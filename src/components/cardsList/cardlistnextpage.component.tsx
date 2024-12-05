@@ -6,6 +6,16 @@ type Card = {
   image: string;
 };
 
+type ApiCard = {
+  value: string;
+  suit: string;
+  image: string;
+};
+
+type ApiResponse = {
+  cards: ApiCard[];
+};
+
 export default function Home() {
   const [deck, setDeck] = useState<Card[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,29 +35,32 @@ export default function Home() {
               method: 'GET',
             }
           );
-    
+
           if (!response.ok) {
-            console.error(`HTTP Error: ${response.status}`);
             throw new Error(`Failed to fetch deck. Status: ${response.status}`);
           }
-    
-          const data = await response.json();
-          const cards = data.cards.map((card: any) => ({
+
+          const data: ApiResponse = await response.json();
+          const cards = data.cards.map((card) => ({
             value: card.value,
             suit: card.suit,
             image: card.image,
           }));
-    
+
           setDeck(cards);
-        } catch (error: any) {
-          setError(`Error: ${error.message}`);
-          console.error('Fetch Error:', error);
+        } catch (err) {
+          if (err instanceof Error) {
+            setError(`Error: ${err.message}`);
+          } else {
+            setError('Unknown error occurred');
+          }
+          console.error('Fetch Error:', err);
         } finally {
           setLoading(false);
         }
       }
     };
-    
+
     fetchDeck();
   }, []);
 
